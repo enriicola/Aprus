@@ -1,4 +1,3 @@
-# Our logo :)
 ![Aprus](aprus.png)
 
 # Aprus
