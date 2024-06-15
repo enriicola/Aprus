@@ -20,6 +20,6 @@ Roman gardens' goddess
 - [ ] Automatic mini-roof to protect the plant from too much light (270°)
 
 ## Tinkercad project link:
-https://www.tinkercad.com/things/fTe6mvNeKUt-cool-kieran-hango/editel?sharecode=a3XJRuXadW0cFFfPmM5bqneMMnQg61FIHMT-WGYhMuQ
+- https://www.tinkercad.com/things/fTe6mvNeKUt-cool-kieran-hango/editel?sharecode=a3XJRuXadW0cFFfPmM5bqneMMnQg61FIHMT-WGYhMuQ
 
 
