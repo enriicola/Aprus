@@ -56,6 +56,14 @@
       "left": 64.5,
       "rotate": 180,
       "attrs": { "distance": "54" }
+    },
+    {
+      "type": "wokwi-ntc-temperature-sensor",
+      "id": "ntc1",
+      "top": 107.8,
+      "left": 249.6,
+      "rotate": 180,
+      "attrs": {}
     }
   ],
   "connections": [
@@ -79,7 +87,10 @@
     [ "ultrasonic1:VCC", "esp:5V", "red", [ "v0" ] ],
     [ "ultrasonic1:GND", "esp:GND.1", "black", [ "v-9.6", "h-56.4", "v-76.8" ] ],
     [ "ultrasonic1:ECHO", "esp:26", "green", [ "h-28", "v-124.8" ] ],
-    [ "ultrasonic1:TRIG", "esp:27", "green", [ "v-9.6", "h-57.2", "v-105.6" ] ]
+    [ "ultrasonic1:TRIG", "esp:27", "green", [ "v-9.6", "h-57.2", "v-105.6" ] ],
+    [ "ntc1:GND", "esp:GND.1", "black", [ "h0" ] ],
+    [ "ntc1:VCC", "esp:5V", "red", [ "h0" ] ],
+    [ "ntc1:OUT", "esp:14", "green", [ "h0" ] ]
   ],
   "dependencies": {}
 }
