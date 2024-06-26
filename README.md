@@ -19,7 +19,6 @@ Roman gardens' goddess
 - [ ] Notifications to the user if the plant needs more light
 - [ ] Automatic mini-roof to protect the plant from too much light (270°)
 
-## Tinkercad project link:
-- https://www.tinkercad.com/things/fTe6mvNeKUt-cool-kieran-hango/editel?sharecode=a3XJRuXadW0cFFfPmM5bqneMMnQg61FIHMT-WGYhMuQ
-
+## Wokwi project link:
+- https://wokwi.com/projects/401746375438845953
 
