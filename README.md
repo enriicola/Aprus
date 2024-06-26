@@ -18,7 +18,3 @@ Roman gardens' goddess
 - [ ] LED system to alert low level of the water tank
 - [ ] Notifications to the user if the plant needs more light
 - [ ] Automatic mini-roof to protect the plant from too much light (270°)
-
-## Wokwi project link:
-- https://wokwi.com/projects/401746375438845953
-
