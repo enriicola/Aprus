@@ -70,6 +70,7 @@
     { "type": "wokwi-vcc", "id": "vcc1", "top": 114.24, "left": 278.6, "attrs": {} },
     { "type": "wokwi-vcc", "id": "vcc2", "top": 115.96, "left": 412.8, "attrs": {} },
     { "type": "wokwi-gnd", "id": "gnd1", "top": 249.6, "left": 277.8, "attrs": {} },
+<<<<<<< HEAD
     { "type": "wokwi-gnd", "id": "gnd2", "top": 116.6, "left": 451, "rotate": 180, "attrs": {} },
     { "type": "wokwi-led", "id": "led3", "top": -138, "left": 224.6, "attrs": { "color": "red" } },
     {
@@ -95,6 +96,9 @@
       "rotate": 90,
       "attrs": { "value": "1000" }
     }
+=======
+    { "type": "wokwi-gnd", "id": "gnd2", "top": 116.6, "left": 451, "rotate": 180, "attrs": {} }
+>>>>>>> 4fc63a3914b2f9e989a7b18068bac916ccee9b5c
   ],
   "connections": [
     [ "esp:TX", "$serialMonitor:RX", "", [] ],
@@ -126,6 +130,7 @@
     [ "relay1:VCC", "vcc1:VCC", "red", [ "v38.4", "h19.2" ] ],
     [ "relay1:COM", "vcc2:VCC", "red", [ "h20.4", "v-1.4" ] ],
     [ "relay1:GND", "gnd1:GND", "black", [ "h0", "v-58" ] ],
+<<<<<<< HEAD
     [ "led2:C", "gnd2:GND", "black", [ "h-18.8", "v-48" ] ],
     [ "led4:C", "esp:GND.2", "black", [ "h-57.2", "v96" ] ],
     [ "led4:A", "r2:1", "green", [ "v0" ] ],
@@ -133,6 +138,9 @@
     [ "led3:C", "esp:GND.2", "black", [ "h-95.6", "v134.4" ] ],
     [ "led3:A", "r3:1", "green", [ "v0" ] ],
     [ "r3:2", "esp:19", "green", [ "v123.6", "h-105.6" ] ]
+=======
+    [ "led2:C", "gnd2:GND", "black", [ "h-18.8", "v-48" ] ]
+>>>>>>> 4fc63a3914b2f9e989a7b18068bac916ccee9b5c
   ],
   "dependencies": {}
 }

@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 // https://docs.espressif.com/projects/esp-idf/en/stable/esp32/hw-reference/esp32/get-started-devkitc.html
+=======
+//https://docs.espressif.com/projects/esp-idf/en/stable/esp32/hw-reference/esp32/get-started-devkitc.html
+>>>>>>> 4fc63a3914b2f9e989a7b18068bac916ccee9b5c
 #include <ESP32Servo.h>
 #include <MKL_HCSR04.h>
 #include "DHT.h"
@@ -14,10 +18,13 @@
 #define hc_echo 14
 #define dht_pin 4
 #define rele_pin 15
+<<<<<<< HEAD
 #define connection_success_led 23
 #define connection_failure_led 19
 #define client_id "Aprus_ESP32_clientID"
 #define topic "Aprus"
+=======
+>>>>>>> 4fc63a3914b2f9e989a7b18068bac916ccee9b5c
 
 // Replace with your network credentials
 const char* ssid = "Wokwi-GUEST";
@@ -34,9 +41,12 @@ MKL_HCSR04 hc(hc_trigger, hc_echo);
 
 DHT dht(dht_pin, DHT22);
 
+<<<<<<< HEAD
 WiFiClient espClient;
 PubSubClient client(espClient); //lib required for mqtt
 
+=======
+>>>>>>> 4fc63a3914b2f9e989a7b18068bac916ccee9b5c
 void setup()
 {
   // Serial
@@ -53,15 +63,21 @@ void setup()
 
   // Set up MQTT client
   client.setServer(mqttServer, mqttPort);
+<<<<<<< HEAD
   // client.setCallback(callback); //TODO later
   
+=======
+>>>>>>> 4fc63a3914b2f9e989a7b18068bac916ccee9b5c
 
   // LightSensor
   pinMode(ldr_pin, INPUT);
   // Light Bulb
   pinMode(led_pin, OUTPUT);
+<<<<<<< HEAD
   digitalWrite(led_pin, LOW);
 
+=======
+>>>>>>> 4fc63a3914b2f9e989a7b18068bac916ccee9b5c
   // Servo
   Servo1.attach(servo_pin1);
   Servo2.attach(servo_pin2);
@@ -72,6 +88,7 @@ void setup()
   pinMode(rele_pin, OUTPUT);
   digitalWrite(rele_pin, LOW);
 
+<<<<<<< HEAD
   pinMode(moisture_pin, INPUT);
 
 
@@ -154,6 +171,8 @@ float get_lux(){
   float resistance = 2000 * voltage / (1 - voltage / 5);
   float lux = pow(RL10 * 1e3 * pow(10, GAMMA) / resistance, (1 / GAMMA));
   return lux;
+=======
+>>>>>>> 4fc63a3914b2f9e989a7b18068bac916ccee9b5c
 }
 
 void led() {
@@ -170,8 +189,13 @@ void temperature (){
   Serial.print("Temperature: ");
   Serial.print(temp);
   Serial.print("ºC ");
+<<<<<<< HEAD
   Serial.println("Humidity: ");
   Serial.print(humi);
+=======
+  Serial.print("Humidity: ");
+  Serial.println(humi);
+>>>>>>> 4fc63a3914b2f9e989a7b18068bac916ccee9b5c
 
 }
 
@@ -195,10 +219,18 @@ void watertank() {
   Serial.print("Tank: ");
   Serial.println(hc.dist());
 
+<<<<<<< HEAD
   if (hc.dist() < 40)
       digitalWrite(rele_pin, HIGH);
   else
       digitalWrite(rele_pin, LOW);
+=======
+  if (hc.dist() < 40) {
+      digitalWrite(rele_pin, HIGH);
+  } else {
+      digitalWrite(rele_pin, LOW);
+  }
+>>>>>>> 4fc63a3914b2f9e989a7b18068bac916ccee9b5c
 }
 
 void mqtt() {
