@@ -1,36 +1,66 @@
+//https://docs.espressif.com/projects/esp-idf/en/stable/esp32/hw-reference/esp32/get-started-devkitc.html
 #include <ESP32Servo.h>
 #include <MKL_HCSR04.h>
+#include "DHT.h"
+#include <WiFi.h>
+#include <PubSubClient.h>
 
-int servo_pin1 = 33;   // Declare the Servo pin 
-int servo_pin2 = 32;
-Servo Servo1;        // Create a servo object 
+#define servo_pin1 33
+#define servo_pin2 32
+#define ldr_pin 34
+#define led_pin 22
+#define moisture_pin 25
+#define hc_trigger 12
+#define hc_echo 14
+#define dht_pin 4
+#define rele_pin 15
+
+// Replace with your network credentials
+const char* ssid = "Wokwi-GUEST";
+const char* password = "";
+
+// Replace with your MQTT broker details
+const char* mqttServer = "mqtt.eclipseprojects.io";
+const int mqttPort = 1883;
+
+Servo Servo1;       
 Servo Servo2;
 
-int ldr_pin = 34;//assigning ldr pin no.
-int led_pin = 22;//assigning bulb pin no.
-
-int moisture_pin = 25;
-int temperature_pin = 14;
-
-int hc_trigger = 25;
-int hc_echo = 27;
 MKL_HCSR04 hc(hc_trigger, hc_echo);
+
+DHT dht(dht_pin, DHT22);
 
 void setup()
 {
   // Serial
   Serial.begin(9600);
-    
+
+  // Connect to Wi-Fi
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(250);
+  }
+  Serial.println("WiFi connected");
+  Serial.println("IP address: ");
+  Serial.println(WiFi.localIP());
+
+  // Set up MQTT client
+  client.setServer(mqttServer, mqttPort);
 
   // LightSensor
   pinMode(ldr_pin, INPUT);
-  	// Light Bulb
-  	pinMode(led_pin, OUTPUT);
-	  // Servo
-    Servo1.attach(servo_pin1);
-    Servo2.attach(servo_pin2);
-    // Temperature Sensor
-    pinMode(temperature_pin, INPUT);
+  // Light Bulb
+  pinMode(led_pin, OUTPUT);
+  // Servo
+  Servo1.attach(servo_pin1);
+  Servo2.attach(servo_pin2);
+
+  // Temperature and Humidity Sensor
+  dht.begin();
+  
+  pinMode(rele_pin, OUTPUT);
+  digitalWrite(rele_pin, LOW);
+
 }
 
 void led() {
@@ -42,19 +72,15 @@ void led() {
 }
 
 void temperature (){
-  // TODO aggiustare
-  const float BETA = 3950; // should match the Beta Coefficient of the thermistor
-  int analogValue = analogRead(temperature_pin);
-  float celsius = 1 / (log(1 / (1023. / analogValue - 1)) / BETA + 1.0 / 298.15) - 273.15;
+  
+  float humi = dht.readHumidity();
+  float temp = dht.readTemperature();
+  Serial.print("Temperature: ");
+  Serial.print(temp);
+  Serial.print("ºC ");
+  Serial.print("Humidity: ");
+  Serial.println(humi);
 
-  if (analogRead(celsius) > 38)
-      digitalWrite(led_pin, 0);
-  else
-      digitalWrite(led_pin, 1);
-
-    String message = "Temperature in °C: ";
-    Serial.println(message);
-    Serial.println(celsius);
 }
 
 void servo() {
@@ -77,13 +103,19 @@ void moisture() {
 void watertank() {
   Serial.print("Tank: ");
   Serial.println(hc.dist());
+
+  if (hc.dist() < 40) {
+      digitalWrite(rele_pin, HIGH);
+  } else {
+      digitalWrite(rele_pin, LOW);
+  }
 }
 
 void mqtt() {
-  int lightsensor_data = analogRead(ldr_pin);
   
-  String message = "Lightsensor: " + String(lightsensor_data);
-  Serial.println(message);
+  client.publish("aprus", "ciao");
+
+
 }
 
 void loop()

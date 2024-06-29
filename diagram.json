@@ -3,7 +3,7 @@
   "author": "Matvey Shinkarev",
   "editor": "wokwi",
   "parts": [
-    { "type": "board-esp32-devkit-c-v4", "id": "esp", "top": 0, "left": 43.24, "attrs": {} },
+    { "type": "board-esp32-devkit-c-v4", "id": "esp", "top": 9.6, "left": 43.24, "attrs": {} },
     {
       "type": "wokwi-led",
       "id": "led1",
@@ -44,33 +44,45 @@
     {
       "type": "chip-soil-moisture",
       "id": "chip1",
-      "top": -113.1,
-      "left": 34.72,
+      "top": -132.3,
+      "left": 25.12,
       "rotate": 270,
       "attrs": {}
     },
     {
       "type": "wokwi-hc-sr04",
       "id": "ultrasonic1",
-      "top": 240.5,
-      "left": 64.5,
+      "top": 278.9,
+      "left": 93.3,
       "rotate": 180,
-      "attrs": { "distance": "54" }
+      "attrs": { "distance": "276" }
     },
     {
-      "type": "wokwi-ntc-temperature-sensor",
-      "id": "ntc1",
-      "top": 107.8,
-      "left": 249.6,
-      "rotate": 180,
-      "attrs": {}
-    }
+      "type": "wokwi-dht22",
+      "id": "dht1",
+      "top": 12.6,
+      "left": 431.1,
+      "rotate": 90,
+      "attrs": { "temperature": "5.3", "humidity": "60.5" }
+    },
+    { "type": "wokwi-relay-module", "id": "relay1", "top": 173, "left": 288, "attrs": {} },
+    {
+      "type": "wokwi-led",
+      "id": "led2",
+      "top": 159.6,
+      "left": 464.6,
+      "attrs": { "color": "magenta" }
+    },
+    { "type": "wokwi-vcc", "id": "vcc1", "top": 114.24, "left": 278.6, "attrs": {} },
+    { "type": "wokwi-vcc", "id": "vcc2", "top": 115.96, "left": 412.8, "attrs": {} },
+    { "type": "wokwi-gnd", "id": "gnd1", "top": 249.6, "left": 277.8, "attrs": {} },
+    { "type": "wokwi-gnd", "id": "gnd2", "top": 116.6, "left": 451, "rotate": 180, "attrs": {} }
   ],
   "connections": [
     [ "esp:TX", "$serialMonitor:RX", "", [] ],
     [ "esp:RX", "$serialMonitor:TX", "", [] ],
     [ "led1:C", "esp:GND.2", "black", [ "h0" ] ],
-    [ "esp:22", "r1:1", "red", [ "h0" ] ],
+    [ "esp:22", "r1:1", "red", [ "h9.6", "v-9.6" ] ],
     [ "r1:2", "led1:A", "red", [ "v0", "h37.2" ] ],
     [ "ldr1:GND", "esp:GND.1", "black", [ "h28.8", "v105.2" ] ],
     [ "ldr1:AO", "esp:34", "green", [ "h0" ] ],
@@ -82,15 +94,21 @@
     [ "servo1:PWM", "esp:32", "green", [ "v0" ] ],
     [ "servo2:PWM", "esp:33", "green", [ "v0" ] ],
     [ "chip1:GND", "esp:GND.2", "black", [ "v19.2", "h67.2" ] ],
-    [ "chip1:VCC", "esp:3V3", "red", [ "h-38.4", "v67.2" ] ],
-    [ "chip1:A0", "esp:25", "green", [ "h-67.2", "v144" ] ],
-    [ "ultrasonic1:VCC", "esp:5V", "red", [ "v0" ] ],
-    [ "ultrasonic1:GND", "esp:GND.1", "black", [ "v-9.6", "h-56.4", "v-76.8" ] ],
-    [ "ultrasonic1:ECHO", "esp:26", "green", [ "h-28", "v-124.8" ] ],
-    [ "ultrasonic1:TRIG", "esp:27", "green", [ "v-9.6", "h-57.2", "v-105.6" ] ],
-    [ "ntc1:GND", "esp:GND.1", "black", [ "h0" ] ],
-    [ "ntc1:VCC", "esp:5V", "red", [ "h0" ] ],
-    [ "ntc1:OUT", "esp:14", "green", [ "h0" ] ]
+    [ "chip1:VCC", "esp:3V3", "red", [ "v28.8", "h-28.8", "v67.2" ] ],
+    [ "chip1:A0", "esp:25", "green", [ "v38.4", "h-67.2", "v134.4" ] ],
+    [ "ultrasonic1:VCC", "esp:5V", "red", [ "v-57.6", "h-144.15" ] ],
+    [ "ultrasonic1:GND", "esp:GND.1", "black", [ "v-9.6", "h-104.4", "v-67.2", "h0", "v-38.4" ] ],
+    [ "dht1:VCC", "esp:3V3", "red", [ "v-28.8", "h-355.35" ] ],
+    [ "dht1:SDA", "esp:4", "green", [ "h-220.8", "v9.7" ] ],
+    [ "dht1:GND", "esp:GND.3", "black", [ "h0" ] ],
+    [ "ultrasonic1:ECHO", "esp:14", "green", [ "v-28.8", "h-95.2", "v-105.6" ] ],
+    [ "ultrasonic1:TRIG", "esp:12", "green", [ "v-48", "h-114.8", "v-76.8" ] ],
+    [ "relay1:NO", "led2:A", "red", [ "h39.6", "v27", "h48" ] ],
+    [ "relay1:IN", "esp:15", "green", [ "h-115.2", "v-29" ] ],
+    [ "relay1:VCC", "vcc1:VCC", "red", [ "v38.4", "h19.2" ] ],
+    [ "relay1:COM", "vcc2:VCC", "red", [ "h20.4", "v-1.4" ] ],
+    [ "relay1:GND", "gnd1:GND", "black", [ "h0", "v-58" ] ],
+    [ "led2:C", "gnd2:GND", "black", [ "h-18.8", "v-48" ] ]
   ],
   "dependencies": {}
 }
