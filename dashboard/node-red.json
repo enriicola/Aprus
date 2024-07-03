@@ -1,0 +1,78 @@
+[
+    {
+        "id": "e86ebc04195698cf",
+        "type": "tab",
+        "label": "Flow 1",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "bf6af09b8f857530",
+        "type": "mqtt in",
+        "z": "e86ebc04195698cf",
+        "name": "",
+        "topic": "Aprus",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "93b2eeaeb22ea01c",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 210,
+        "y": 280,
+        "wires": [
+            [
+                "8a640bed1b8e46d9"
+            ]
+        ]
+    },
+    {
+        "id": "8a640bed1b8e46d9",
+        "type": "debug",
+        "z": "e86ebc04195698cf",
+        "name": "debug 3",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 420,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "93b2eeaeb22ea01c",
+        "type": "mqtt-broker",
+        "name": "EclipseMQTT",
+        "broker": "mqtt://mqtt.eclipseprojects.io/",
+        "port": "1883",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "3",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    }
+]
