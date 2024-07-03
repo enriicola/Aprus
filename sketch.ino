@@ -1,41 +1,38 @@
+//https://docs.espressif.com/projects/esp-idf/en/stable/esp32/hw-reference/esp32/get-started-devkitc.html
 #include <ESP32Servo.h>
 #include <MKL_HCSR04.h>
 #include "DHT.h"
 #include <WiFi.h>
 #include <PubSubClient.h>
-#include <ArduinoJson.h>
 
-// Pin definitions
-#define SERVO_PIN1 33
-#define SERVO_PIN2 32
-#define LDR_PIN 34
-#define LED_PIN 22
-#define MOISTURE_PIN 35
-#define HC_TRIGGER 12
-#define HC_ECHO 14
-#define DHT_PIN 4
-#define RELE_PIN 15
-#define CONNECTION_SUCCESS_LED 23
-#define CONNECTION_FAILURE_LED 19
+#define servo_pin1 33
+#define servo_pin2 32
+#define ldr_pin 34
+#define led_pin 22
+#define moisture_pin 25
+#define hc_trigger 12
+#define hc_echo 14
+#define dht_pin 4
+#define rele_pin 15
 
-// MQTT details
-#define CLIENT_ID "Aprus_ESP32_clientID"
-#define TOPIC "Aprus"
-#define SSID "Wokwi-GUEST"
-#define PASSWORD ""
-#define MQTT_SERVER "mqtt.eclipseprojects.io"
-#define MQTT_PORT 1883
+// Replace with your network credentials
+const char* ssid = "Wokwi-GUEST";
+const char* password = "";
 
-// Device objects
-Servo servo1;       
-Servo servo2;
-MKL_HCSR04 hc(HC_TRIGGER, HC_ECHO);
-DHT dht(DHT_PIN, DHT22);
-WiFiClient espClient;
-PubSubClient client(espClient);
+// Replace with your MQTT broker details
+const char* mqttServer = "mqtt.eclipseprojects.io";
+const int mqttPort = 1883;
 
-void setup() {
-  // Initialize Serial
+Servo Servo1;       
+Servo Servo2;
+
+MKL_HCSR04 hc(hc_trigger, hc_echo);
+
+DHT dht(dht_pin, DHT22);
+
+void setup()
+{
+  // Serial
   Serial.begin(9600);
 
   // Connect to Wi-Fi
@@ -48,73 +45,40 @@ void setup() {
   Serial.println(WiFi.localIP());
 
   // Set up MQTT client
-  client.setServer(MQTT_SERVER, MQTT_PORT);
+  client.setServer(mqttServer, mqttPort);
 
-  // Pin modes
-  pinMode(LDR_PIN, INPUT);
-  pinMode(LED_PIN, OUTPUT);
-  digitalWrite(LED_PIN, LOW);
-  
-  servo1.attach(SERVO_PIN1);
-  servo2.attach(SERVO_PIN2);
+  // LightSensor
+  pinMode(ldr_pin, INPUT);
+  // Light Bulb
+  pinMode(led_pin, OUTPUT);
+  // Servo
+  Servo1.attach(servo_pin1);
+  Servo2.attach(servo_pin2);
 
   dht.begin();
   
-  pinMode(RELE_PIN, OUTPUT);
-  digitalWrite(RELE_PIN, LOW);
-  
-  pinMode(MOISTURE_PIN, INPUT);
+  pinMode(rele_pin, OUTPUT);
+  digitalWrite(rele_pin, LOW);
 
-  pinMode(CONNECTION_SUCCESS_LED, OUTPUT);
-  pinMode(CONNECTION_FAILURE_LED, OUTPUT);
-
-  connect_mqtt();
-}
-
-void connect_mqtt() {
-  if (client.connect(CLIENT_ID)) {
-    client.subscribe(TOPIC);
-    client.publish(TOPIC, "Connection succesfull");
-    digitalWrite(CONNECTION_SUCCESS_LED, HIGH);
-    digitalWrite(CONNECTION_FAILURE_LED, LOW);
-  } else {
-    digitalWrite(CONNECTION_FAILURE_LED, HIGH);
-    reconnect();
-  }
-}
-
-void reconnect() {
-  while (!client.connected()) {
-    Serial.println("Attempting MQTT connection...");
-    if (client.connect(CLIENT_ID)) {
-      Serial.println("connected");
-      client.publish(TOPIC, "Nodemcu connected to MQTT");
-      client.subscribe(TOPIC);
-    } else {
-      Serial.print("failed, rc=");
-      Serial.print(client.state());
-      Serial.println(" try again in 5 seconds");
-      delay(5000);
-    }
-  }
-}
-
-float get_lux() {
-  const float GAMMA = 0.7;
-  const float RL10 = 50;
-
-  int analogValue = analogRead(LDR_PIN);
-  analogValue = map(analogValue, 4095, 0, 1024, 0);
-
-  float voltage = analogValue / 1024.0 * 5;
-  float resistance = 2000 * voltage / (1 - voltage / 5);
-  float lux = pow(RL10 * 1e3 * pow(10, GAMMA) / resistance, (1 / GAMMA));
-  return lux;
 }
 
 void led() {
-  Serial.print("lux: ");
-  Serial.println(get_lux());
+  
+  if (analogRead(ldr_pin) > 500)
+      digitalWrite(led_pin, 0);
+  else
+      digitalWrite(led_pin, 1);
+}
+
+void temperature (){
+  
+  float humi = dht.readHumidity();
+  float temp = dht.readTemperature();
+  Serial.print("Temperature: ");
+  Serial.print(temp);
+  Serial.print("ºC ");
+  Serial.print("Humidity: ");
+  Serial.println(humi);
 
   if (get_lux() > 50) {
     digitalWrite(LED_PIN, LOW);
@@ -124,24 +88,15 @@ void led() {
 }
 
 void servo() {
-  if (get_lux() < 15000) {
-    servo1.write(90);
-    servo2.write(90);
+  
+  if (analogRead(ldr_pin) > 500) {
+      Servo1.write(90);
+      Servo2.write(90);
   } else {
-    servo1.write(0);
-    servo2.write(0);
+      Servo1.write(0);
+      Servo2.write(0);
   }
-}
-
-void temperature() {
-  float humidity = dht.readHumidity();
-  float temperature = dht.readTemperature();
-
-  Serial.print("Temperature: ");
-  Serial.print(temperature);
-  Serial.println("ºC ");
-  Serial.print("Humidity: ");
-  Serial.println(humidity);
+  
 }
 
 void moisture() {
@@ -153,11 +108,18 @@ void watertank() {
   Serial.print("Tank: ");
   Serial.println(hc.dist());
 
+<<<<<<< HEAD
+  if (hc.dist() < 40)
+      digitalWrite(rele_pin, HIGH);
+  else
+      digitalWrite(rele_pin, LOW);
+=======
   if (hc.dist() < 40) {
     digitalWrite(RELE_PIN, HIGH);
   } else {
     digitalWrite(RELE_PIN, LOW);
   }
+>>>>>>> 4fc63a3914b2f9e989a7b18068bac916ccee9b5c
 }
 
 void mqtt() {
