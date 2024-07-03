@@ -182,6 +182,9 @@ void mqtt() {
 
   // Publish the JSON string to the MQTT topic
   client.publish(TOPIC, buffer, n);
+
+
+  Serial.println("Inviato");
 }
 
 void loop() { 
