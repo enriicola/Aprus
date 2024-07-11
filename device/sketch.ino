@@ -35,170 +35,169 @@ WiFiClient espClient;
 PubSubClient client(espClient);
 
 void setup() {
-  // Initialize Serial
-  Serial.begin(9600);
+   // Initialize Serial
+   Serial.begin(9600);
 
-  // Connect to Wi-Fi
-  WiFi.begin(SSID, PASSWORD);
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(250);
-  }
-  Serial.println("WiFi connected");
-  Serial.println("IP address: ");
-  Serial.println(WiFi.localIP());
+   // Connect to Wi-Fi
+   WiFi.begin(SSID, PASSWORD);
+   while (WiFi.status() != WL_CONNECTED) {
+      delay(250);
+   }
+   Serial.println("WiFi connected");
+   Serial.println("IP address: ");
+   Serial.println(WiFi.localIP());
 
-  // Set up MQTT client
-  client.setServer(MQTT_SERVER, MQTT_PORT);
+   // Set up MQTT client
+   client.setServer(MQTT_SERVER, MQTT_PORT);
 
-  // Pin modes
-  pinMode(LDR_PIN, INPUT); // initialize LDR (Light Dependent Resistor)
-  pinMode(LED_PIN, OUTPUT); // initialize LED to check sunlight
-  pinMode(MOISTURE_PIN, INPUT); // Initialize moisture sensor
-  pinMode(CONNECTION_SUCCESS_LED, OUTPUT); // Initialize connection success LED
-  pinMode(CONNECTION_FAILURE_LED, OUTPUT); // Initialize connection failure LED
-  pinMode(RELAY_PIN, OUTPUT); // Initialize ultrasonic sensor
+   // Pin modes
+   pinMode(LDR_PIN, INPUT); // initialize LDR (Light Dependent Resistor)
+   pinMode(LED_PIN, OUTPUT); // initialize LED to check sunlight
+   pinMode(MOISTURE_PIN, INPUT); // Initialize moisture sensor
+   pinMode(CONNECTION_SUCCESS_LED, OUTPUT); // Initialize connection success LED
+   pinMode(CONNECTION_FAILURE_LED, OUTPUT); // Initialize connection failure LED
+   pinMode(RELAY_PIN, OUTPUT); // Initialize ultrasonic sensor
 
-  digitalWrite(LED_PIN, LOW); // turn off LED, initially
-  digitalWrite(RELAY_PIN, LOW); // turn off relay, initially
-  
-  servo1.attach(SERVO_PIN1); // attach servo to pin
-  servo2.attach(SERVO_PIN2); // attach servo to pin
+   digitalWrite(LED_PIN, LOW); // turn off LED, initially
+   digitalWrite(RELAY_PIN, LOW); // turn off relay, initially
+   
+   servo1.attach(SERVO_PIN1); // attach servo to pin
+   servo2.attach(SERVO_PIN2); // attach servo to pin
 
-  // Initialize DHT sensor
-  dht.begin(); 
+   // initially roof is closed
+   servo1.write(90);
+   servo2.write(90);
 
-  connect_mqtt();
+   // Initialize DHT sensor
+   dht.begin(); 
+
+   connect_mqtt();
+}
+
+// getter functions
+float get_lux() {
+   const float GAMMA = 0.7;
+   const float RL10 = 50;
+
+   int analogValue = analogRead(LDR_PIN);
+   analogValue = map(analogValue, 4095, 0, 1024, 0);
+
+   float voltage = analogValue / 1024.0 * 5;
+   float resistance = 2000 * voltage / (1 - voltage / 5);
+   float lux = pow(RL10 * 1e3 * pow(10, GAMMA) / resistance, (1 / GAMMA));
+   return lux;
+}
+
+float get_external_humidity() {
+   return dht.readHumidity();
+}
+
+float get_external_temperature() {
+   return dht.readTemperature();
+}
+
+float get_moisture() {
+   return analogRead(MOISTURE_PIN);
+}
+
+float get_water_tank_level() {
+   return hc.dist();
 }
 
 void connect_mqtt() {
-  if (client.connect(CLIENT_ID)) {
-    client.subscribe(TOPIC);
-    client.publish(TOPIC, "Connection succesfull");
-    digitalWrite(CONNECTION_SUCCESS_LED, HIGH);
-    digitalWrite(CONNECTION_FAILURE_LED, LOW);
-  } 
-  else {
-    digitalWrite(CONNECTION_FAILURE_LED, HIGH);
-    reconnect();
-  }
+   if (client.connect(CLIENT_ID)) {
+      client.subscribe(TOPIC);
+      client.publish(TOPIC, "Connection succesfull");
+      digitalWrite(CONNECTION_SUCCESS_LED, HIGH);
+      digitalWrite(CONNECTION_FAILURE_LED, LOW);
+   } 
+   else {
+      digitalWrite(CONNECTION_FAILURE_LED, HIGH);
+      reconnect();
+   }
 }
 
 // virtual infinite loop to reconnect to MQTT
 void reconnect() {
-  while (!client.connected()) {
-    Serial.println("Attempting MQTT connection...");
-    if (client.connect(CLIENT_ID)) {
-      Serial.println("connected");
-      client.publish(TOPIC, "Nodemcu connected to MQTT");
-      client.subscribe(TOPIC);
-    } else {
-      Serial.print("failed, rc=");
-      Serial.print(client.state());
-      Serial.println(" try again in 5 seconds");
-      delay(5000);
-    }
-  }
+   while (!client.connected()) {
+      Serial.println("Attempting MQTT connection...");
+      if (client.connect(CLIENT_ID)) {
+         Serial.println("connected");
+         client.publish(TOPIC, "Nodemcu connected to MQTT");
+         client.subscribe(TOPIC);
+      } else {
+         Serial.print("failed, rc=");
+         Serial.print(client.state());
+         Serial.println(" try again in 5 seconds");
+         delay(5000);
+      }
+   }
 }
 
-float get_lux() {
-  const float GAMMA = 0.7;
-  const float RL10 = 50;
-
-  int analogValue = analogRead(LDR_PIN);
-  analogValue = map(analogValue, 4095, 0, 1024, 0);
-
-  float voltage = analogValue / 1024.0 * 5;
-  float resistance = 2000 * voltage / (1 - voltage / 5);
-  float lux = pow(RL10 * 1e3 * pow(10, GAMMA) / resistance, (1 / GAMMA));
-  return lux;
+// if there is too much sunlight, turn on the white LED
+void check_sunlight() {
+   if (get_lux() > 50)
+      digitalWrite(LED_PIN, LOW);
+   else
+      digitalWrite(LED_PIN, HIGH);
 }
 
-void alert_if_low_sunlight() {
-  // Serial.print("lux: ");
-  // Serial.println(get_lux());
-
-  if (get_lux() > 50) {
-    digitalWrite(LED_PIN, LOW);
-  }
-  else {
-    digitalWrite(LED_PIN, HIGH);
-  }
+// if there is too much sunlight, close the roof
+void manage_roof() {
+   if (get_lux() > 80000) {
+      servo1.write(0);
+      servo2.write(0);
+   }
+   else {
+      servo1.write(90);
+      servo2.write(90);
+   }
 }
 
-void adjust_roof_if_high_sunlight() {
-  Serial.print("lux for servo: ");
-  Serial.println(get_lux());
-  if (get_lux() > 1500.0) {
-    servo1.write(90);
-    servo2.write(90);
-  }
-  else {
-    servo1.write(0);
-    servo2.write(0);
-  }
-}
-
-void temperature() {
-  float humidity = dht.readHumidity();
-  float temperature = dht.readTemperature();
-
-  Serial.print("Temperature: ");
-  Serial.print(temperature);
-  Serial.println("ºC ");
-  Serial.print("Humidity: ");
-  Serial.println(humidity);
-}
-
-void moisture() {
-  Serial.print("Moisture: ");
-  Serial.println(analogRead(MOISTURE_PIN));
-}
-
-void watertank() {
-  Serial.print("Tank: ");
-  Serial.println(hc.dist());
-
-  if (hc.dist() < 40) {
-    digitalWrite(RELAY_PIN, HIGH);
-  }
-  else {
-    digitalWrite(RELAY_PIN, LOW);
-  }
+void manage_watering() {
+   // digitalWrite(RELAY_PIN, (get_water_tank_level() > 70 && get_moisture() < 80) ? HIGH : LOW);
+   
+   // se l'acqua dista più di 70 cm e l'umidità è minore dell'80% ...
+   if (get_water_tank_level()<70 && get_moisture()<80)
+      digitalWrite(RELAY_PIN, HIGH); // Attiva l'irrigazione
+   else
+      digitalWrite(RELAY_PIN, LOW); // Disattiva l'irrigazione
 }
 
 void mqtt() {
-  // Gather sensor data
-  float lux = get_lux();
-  float humidity = dht.readHumidity();
-  float temperature = dht.readTemperature();
-  int moisture = analogRead(MOISTURE_PIN);
-  float tankDistance = hc.dist();
+   // Gather sensor data
+   float lux = get_lux();
+   float humidity = dht.readHumidity();
+   float temperature = dht.readTemperature();
+   int moisture = analogRead(MOISTURE_PIN);
+   float tankDistance = hc.dist();
 
-  // Create JSON document
-  StaticJsonDocument<256> doc;
-  doc["lux"] = lux;
-  doc["humidity"] = humidity;
-  doc["temperature"] = temperature;
-  doc["moisture"] = moisture;
-  doc["tankDistance"] = tankDistance;
+   // Create JSON document
+   StaticJsonDocument<256> doc;
+   doc["lux"] = lux;
+   doc["humidity"] = get_external_humidity();
+   doc["temperature"] = get_external_temperature();
+   doc["moisture"] = moisture;
+   doc["tankDistance"] = tankDistance;
 
-  // Serialize JSON document to a string
-  char buffer[256];
-  size_t n = serializeJson(doc, buffer);
+   // Serialize JSON document to a string
+   char buffer[256];
+   size_t n = serializeJson(doc, buffer);
 
-  // Publish the JSON string to the MQTT topic
-  client.publish(TOPIC, buffer, n);
+   // Publish the JSON string to the MQTT topic
+   client.publish(TOPIC, buffer, n);
 
-  Serial.println("Sended ;)");
+   // Serial.println("Sended ;)");
 }
 
 void loop() {
-  Serial.println();
-  alert_if_low_sunlight();
-  temperature();
-  adjust_roof_if_high_sunlight();
-  moisture();
-  watertank();
-  mqtt();
-  delay(5000);
+   check_sunlight();
+
+   manage_roof();
+   
+   manage_watering();
+
+   mqtt();
+
+   delay(1000);
 }
