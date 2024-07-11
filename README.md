@@ -5,7 +5,6 @@ Roman gardens' goddess
 
 ## Sensors we plan to use:
 - [x] External Temperature
-- [ ] Soil Temperature (to show that our system keeps the temperature stable w.r.t. the external temperature)
 - [x] External humidity
 - [x] Soil moisture (to show that our system keeps the moisture stable w.r.t. the external humidity)
 - [x] Light sensor to protect a specific plant from too much light and to alert the user if the plant is not receiving enough light
@@ -13,8 +12,7 @@ Roman gardens' goddess
 - [x] Water tank level (to check if the user needs to refill it)
 
 ## Features we plan to implement:
-- [ ] Automatic watering system
-- [ ] Automatic temperature control
-- [ ] LED system to alert low level of the water tank
+- [x] Automatic watering system
+- [ ] Dashboard GUI system to alert low level of the water tank
 - [ ] Notifications to the user if the plant needs more light
-- [ ] Automatic mini-roof to protect the plant from too much light (270°)
+- [x] Automatic mini-roof to protect the plant from too much light
