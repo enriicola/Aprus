@@ -14,7 +14,7 @@
 #define HC_TRIGGER 12
 #define HC_ECHO 14
 #define DHT_PIN 4
-#define RELE_PIN 15
+#define RELAY_PIN 15
 #define CONNECTION_SUCCESS_LED 23
 #define CONNECTION_FAILURE_LED 19
 
@@ -51,22 +51,21 @@ void setup() {
   client.setServer(MQTT_SERVER, MQTT_PORT);
 
   // Pin modes
-  pinMode(LDR_PIN, INPUT);
-  pinMode(LED_PIN, OUTPUT);
-  digitalWrite(LED_PIN, LOW);
-  
-  servo1.attach(SERVO_PIN1);
-  servo2.attach(SERVO_PIN2);
+  pinMode(LDR_PIN, INPUT); // initialize LDR (Light Dependent Resistor)
+  pinMode(LED_PIN, OUTPUT); // initialize LED to check sunlight
+  pinMode(MOISTURE_PIN, INPUT); // Initialize moisture sensor
+  pinMode(CONNECTION_SUCCESS_LED, OUTPUT); // Initialize connection success LED
+  pinMode(CONNECTION_FAILURE_LED, OUTPUT); // Initialize connection failure LED
+  pinMode(RELAY_PIN, OUTPUT); // Initialize ultrasonic sensor
 
-  dht.begin();
+  digitalWrite(LED_PIN, LOW); // turn off LED, initially
+  digitalWrite(RELAY_PIN, LOW); // turn off relay, initially
   
-  pinMode(RELE_PIN, OUTPUT);
-  digitalWrite(RELE_PIN, LOW);
-  
-  pinMode(MOISTURE_PIN, INPUT);
+  servo1.attach(SERVO_PIN1); // attach servo to pin
+  servo2.attach(SERVO_PIN2); // attach servo to pin
 
-  pinMode(CONNECTION_SUCCESS_LED, OUTPUT);
-  pinMode(CONNECTION_FAILURE_LED, OUTPUT);
+  // Initialize DHT sensor
+  dht.begin(); 
 
   connect_mqtt();
 }
@@ -77,12 +76,14 @@ void connect_mqtt() {
     client.publish(TOPIC, "Connection succesfull");
     digitalWrite(CONNECTION_SUCCESS_LED, HIGH);
     digitalWrite(CONNECTION_FAILURE_LED, LOW);
-  } else {
+  } 
+  else {
     digitalWrite(CONNECTION_FAILURE_LED, HIGH);
     reconnect();
   }
 }
 
+// virtual infinite loop to reconnect to MQTT
 void reconnect() {
   while (!client.connected()) {
     Serial.println("Attempting MQTT connection...");
@@ -112,22 +113,26 @@ float get_lux() {
   return lux;
 }
 
-void led() {
-  Serial.print("lux: ");
-  Serial.println(get_lux());
+void alert_if_low_sunlight() {
+  // Serial.print("lux: ");
+  // Serial.println(get_lux());
 
   if (get_lux() > 50) {
     digitalWrite(LED_PIN, LOW);
-  } else {
+  }
+  else {
     digitalWrite(LED_PIN, HIGH);
   }
 }
 
-void servo() {
-  if (get_lux() < 15000) {
+void adjust_roof_if_high_sunlight() {
+  Serial.print("lux for servo: ");
+  Serial.println(get_lux());
+  if (get_lux() > 1500.0) {
     servo1.write(90);
     servo2.write(90);
-  } else {
+  }
+  else {
     servo1.write(0);
     servo2.write(0);
   }
@@ -154,9 +159,10 @@ void watertank() {
   Serial.println(hc.dist());
 
   if (hc.dist() < 40) {
-    digitalWrite(RELE_PIN, HIGH);
-  } else {
-    digitalWrite(RELE_PIN, LOW);
+    digitalWrite(RELAY_PIN, HIGH);
+  }
+  else {
+    digitalWrite(RELAY_PIN, LOW);
   }
 }
 
@@ -183,14 +189,14 @@ void mqtt() {
   // Publish the JSON string to the MQTT topic
   client.publish(TOPIC, buffer, n);
 
-
-  Serial.println("Inviato");
+  Serial.println("Sended ;)");
 }
 
-void loop() { 
-  led();
+void loop() {
+  Serial.println();
+  alert_if_low_sunlight();
   temperature();
-  servo();
+  adjust_roof_if_high_sunlight();
   moisture();
   watertank();
   mqtt();
