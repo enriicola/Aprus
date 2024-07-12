@@ -1,6 +1,6 @@
 {
   "name": "Soil Sensor",
-  "author": "Anonymous maker",
+  "author": "aprus",
   "pins": [
     "GND",
     "VCC",

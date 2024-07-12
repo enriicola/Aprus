@@ -94,6 +94,13 @@
       "left": 220.25,
       "rotate": 90,
       "attrs": { "value": "1000" }
+    },
+    {
+      "type": "chip-ph-soil-sensor",
+      "id": "chip2",
+      "top": -689.4052343750002,
+      "left": -285.8,
+      "attrs": {}
     }
   ],
   "connections": [

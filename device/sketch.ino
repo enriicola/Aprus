@@ -1,3 +1,5 @@
+// TODO add something to work on https://thingspeak.com
+
 #include <ESP32Servo.h>
 #include <MKL_HCSR04.h>
 #include "DHT.h"
@@ -103,6 +105,17 @@ float get_moisture() {
 float get_water_tank_level() {
    return hc.dist();
 }
+float get_soil_ph() { // TODO check if it makes sense
+   Value = analogRead(potPin);
+   float voltage = Value*(3.3/4095.0);
+   return 3.3*voltage;
+   /*
+   int analogValue = analogRead(pHSensorPin);
+   float voltage = analogValue * (3.3 / 4095.0); // 3.3V reference, 12-bit ADC
+   float pHValue = (voltage * 14.0) / 3.3; // Declare pHValue here
+   
+   */
+}
 
 void connect_mqtt() {
    if (client.connect(CLIENT_ID)) {
@@ -190,12 +203,25 @@ void mqtt() {
    // Serial.println("Sended ;)");
 }
 
+// TODO: - [ ] Ph soil sensor (to alert the user if the soil is too acidic or too basic w.r.t. the specific plant's needs)
+// implement it to send information and alerts to the dashboard
+
 void loop() {
    check_sunlight();
 
    manage_roof();
    
    manage_watering();
+
+   float pH = get_soil_ph();
+   // Display pH recommendation
+  if (pH < 5.5) {
+    display.println("pH: Too acidic. Add lime.");
+  } else if (pH > 7.5) {
+    display.println("pH: Too alkaline. Add sulfur.");
+  } else {
+    display.println("pH: Optimal range.");
+  }
 
    mqtt();
 
