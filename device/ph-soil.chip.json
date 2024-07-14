@@ -1,11 +1,7 @@
 {
   "name": "pH Soil Sensor",
   "author": "aprus",
-  "pins": [
-    "GND",
-    "VCC",
-    "A0"
-  ],
+  "pins": ["GND", "VCC", "A0"],
   "controls": [
     {
       "id": "ph",

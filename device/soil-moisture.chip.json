@@ -1,16 +1,7 @@
 {
   "name": "Soil Sensor",
   "author": "aprus",
-  "pins": [
-    "GND",
-    "VCC",
-    "A0",
-    "",
-    "",
-    "",
-    "",
-    ""
-  ],
+  "pins": ["GND", "VCC", "A0","A1"],
   "controls": [
     {
       "id": "moisture",
@@ -19,6 +10,14 @@
       "min": 0,
       "max": 100,
       "step": 1
+    },
+    {
+      "id": "temperature",
+      "label": "Temperature",
+      "type": "range",
+      "min": -10,
+      "max": 60,
+      "step": 0.1
     }
   ]
 }

@@ -1,43 +1,41 @@
 [
-    {
-        "id": "a04abfd45475ca25",
-        "type": "ui_template",
-        "z": "e86ebc04195698cf",
-        "group": "74ac322ea7a587ec",
-        "name": "Table",
-        "order": 1,
-        "width": 30,
-        "height": 19,
-        "format": "<table style=\"width:100%; text-align:center; border-collapse: collapse;\">\n    <thead>\n        <tr>\n            <th style=\"border: 1px solid black;\">Timestamp</th>\n            <th style=\"border: 1px solid black;\">Lux</th>\n            <th style=\"border: 1px solid black;\">Humidity</th>\n            <th style=\"border: 1px solid black;\">Temperature</th>\n            <th style=\"border: 1px solid black;\">Moisture</th>\n            <th style=\"border: 1px solid black;\">Tank Distance</th>\n        </tr>\n    </thead>\n    <tbody>\n        <tr ng-repeat=\"row in msg.payload\">\n            <td style=\"border: 1px solid black;\">{{row.Timestamp}}</td>\n            <td style=\"border: 1px solid black;\">{{row.Lux}}</td>\n            <td style=\"border: 1px solid black;\">{{row.Humidity}}</td>\n            <td style=\"border: 1px solid black;\">{{row.Temperature}}</td>\n            <td style=\"border: 1px solid black;\">{{row.Moisture}}</td>\n            <td style=\"border: 1px solid black;\">{{row.Tank}}</td>\n        </tr>\n    </tbody>\n</table>",
-        "storeOutMessages": true,
-        "fwdInMessages": true,
-        "resendOnRefresh": true,
-        "templateScope": "local",
-        "className": "",
-        "x": 930,
-        "y": 820,
-        "wires": [
-            []
-        ]
-    },
-    {
-        "id": "74ac322ea7a587ec",
-        "type": "ui_group",
-        "name": "Table",
-        "tab": "75945688ffe5ab41",
-        "order": 1,
-        "disp": true,
-        "width": 30,
-        "collapse": false,
-        "className": ""
-    },
-    {
-        "id": "75945688ffe5ab41",
-        "type": "ui_tab",
-        "name": "Data_Table",
-        "icon": "dashboard",
-        "order": 2,
-        "disabled": false,
-        "hidden": false
-    }
+  {
+    "id": "a04abfd45475ca25",
+    "type": "ui_template",
+    "z": "e86ebc04195698cf",
+    "group": "74ac322ea7a587ec",
+    "name": "Table",
+    "order": 1,
+    "width": 30,
+    "height": 19,
+    "format": "<table style=\"width:100%; text-align:center; border-collapse: collapse;\">\n    <thead>\n        <tr>\n            <th style=\"border: 1px solid black;\">Timestamp</th>\n            <th style=\"border: 1px solid black;\">Lux</th>\n            <th style=\"border: 1px solid black;\">Humidity</th>\n            <th style=\"border: 1px solid black;\">Temperature</th>\n            <th style=\"border: 1px solid black;\">Moisture</th>\n            <th style=\"border: 1px solid black;\">Tank Distance</th>\n        </tr>\n    </thead>\n    <tbody>\n        <tr ng-repeat=\"row in msg.payload\">\n            <td style=\"border: 1px solid black;\">{{row.Timestamp}}</td>\n            <td style=\"border: 1px solid black;\">{{row.Lux}}</td>\n            <td style=\"border: 1px solid black;\">{{row.Humidity}}</td>\n            <td style=\"border: 1px solid black;\">{{row.Temperature}}</td>\n            <td style=\"border: 1px solid black;\">{{row.Moisture}}</td>\n            <td style=\"border: 1px solid black;\">{{row.Tank}}</td>\n        </tr>\n    </tbody>\n</table>",
+    "storeOutMessages": true,
+    "fwdInMessages": true,
+    "resendOnRefresh": true,
+    "templateScope": "local",
+    "className": "",
+    "x": 930,
+    "y": 820,
+    "wires": [[]]
+  },
+  {
+    "id": "74ac322ea7a587ec",
+    "type": "ui_group",
+    "name": "Table",
+    "tab": "75945688ffe5ab41",
+    "order": 1,
+    "disp": true,
+    "width": 30,
+    "collapse": false,
+    "className": ""
+  },
+  {
+    "id": "75945688ffe5ab41",
+    "type": "ui_tab",
+    "name": "Data_Table",
+    "icon": "dashboard",
+    "order": 2,
+    "disabled": false,
+    "hidden": false
+  }
 ]
