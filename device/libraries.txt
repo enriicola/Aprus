@@ -8,3 +8,5 @@ HCSR04 ultrasonic MKL
 DHT sensor library
 PubSubClient
 ArduinoJson
+OneWire
+DallasTemperature

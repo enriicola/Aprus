@@ -1,11 +1,11 @@
 {
   "name": "pH Soil Sensor",
   "author": "aprus",
-  "pins": ["GND", "VCC", "A0"],
+  "pins": ["GND", "VCC", "A"],
   "controls": [
     {
-      "id": "ph",
-      "label": "Soil pH",
+      "id": "value",
+      "label": "value",
       "type": "range",
       "min": 0,
       "max": 14,
