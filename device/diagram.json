@@ -49,7 +49,7 @@
       "top": 288.5,
       "left": 26.1,
       "rotate": 180,
-      "attrs": { "distance": "276" }
+      "attrs": { "distance": "27" }
     },
     {
       "type": "wokwi-dht22",
@@ -57,7 +57,7 @@
       "top": 12.6,
       "left": 431.1,
       "rotate": 90,
-      "attrs": { "temperature": "5.3", "humidity": "60.5" }
+      "attrs": { "temperature": "10.1", "humidity": "70" }
     },
     { "type": "wokwi-relay-module", "id": "relay1", "top": 173, "left": 288, "attrs": {} },
     {
@@ -141,7 +141,8 @@
     [ "temp1:GND", "esp:GND.2", "black", [ "v-9.6", "h-28.8", "v-96", "h403.2" ] ],
     [ "temp1:DQ", "esp:25", "green", [ "v0" ] ],
     [ "chip2:A0", "esp:26", "green", [ "v0" ] ],
-    [ "chip1:A0", "esp:35", "green", [ "v11.41", "h48", "v105.6" ] ]
+    [ "chip1:A0", "esp:35", "green", [ "v11.41", "h48", "v105.6" ] ],
+    [ "chip2:A", "esp:0", "green", [ "v0" ] ]
   ],
   "dependencies": {}
 }

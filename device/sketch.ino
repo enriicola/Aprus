@@ -1,7 +1,14 @@
 // TODO add something to work on https://thingspeak.com
+// TODO implement a id for every id (define id etc)
+// TODO implement receiving of various threshold from mqtt server and use them as variables
+  // Handle Incoming MQTT Messages
+// TODO Use Thresholds given by mqtt server in Your Logic
+// TODO additional improvements (	•	Error Handling: Ensure error handling for sensor readings and MQTT operations is robust. •	Power Management: If power consumption is a concern, consider implementing sleep modes or optimizing sensor polling intervals. •	Comments and Documentation: Add more comments to clarify the purpose of each function and variable.)
+
+
 
 #include <ESP32Servo.h>
-#include <MKL_HCSR04.h>
+#include <MKL_HCSR04.h> // for ultrasonic sensor
 #include "DHT.h"
 #include <WiFi.h>
 #include <PubSubClient.h>
@@ -17,7 +24,7 @@
 #define MOISTURE_PIN 35
 #define SOIL_TEMP_PIN 25
 
-#define PH_PIN 35
+#define PH_PIN 2 // TODO: does not read anything
 
 #define HC_TRIGGER 12
 #define HC_ECHO 14
@@ -33,6 +40,15 @@
 #define PASSWORD ""
 #define MQTT_SERVER "mqtt.eclipseprojects.io"
 #define MQTT_PORT 1883
+
+// implement struct for threshold values
+struct Thresholds
+{
+  float lux;
+  float moisture;
+  float tankDistance;
+};
+
 
 // Device objects
 Servo servo1;
@@ -103,17 +119,14 @@ float get_lux()
   float lux = pow(RL10 * 1e3 * pow(10, GAMMA) / resistance, (1 / GAMMA));
   return lux;
 }
-
 float get_external_humidity()
 {
   return dht.readHumidity();
 }
-
 float get_external_temperature()
 {
   return dht.readTemperature();
 }
-
 float get_moisture()
 {
   return analogRead(MOISTURE_PIN);
@@ -123,20 +136,20 @@ float get_soil_temp()
   ds.requestTemperatures();
   return ds.getTempCByIndex(0);
 }
-
 float get_water_tank_level()
 {
   return hc.dist();
 }
 float get_soil_ph()
 {
-  //float pH = ((float) analogRead(PH_PIN) / 4095.0) * 14;
-  //return pH;
-  return analogRead(PH_PIN);
-
-  // int analogValue = analogRead(pHSensorPin);
-  // float voltage = analogValue * (3.3 / 4095.0); // 3.3V reference, 12-bit ADC
-  // float pHValue = (voltage * 14.0) / 3.3; // Declare pHValue here
+  // TODO: If the pH sensor isn’t reading anything, verify its connection and calibration. You may need to calibrate or replace the sensor. For debugging, print raw values from the pH sensor to confirm it’s receiving input.
+  float get_soil_ph()
+  {
+    int rawValue = analogRead(PH_PIN);
+    Serial.print("Raw pH value: ");
+    Serial.println(rawValue);
+    return ((float)rawValue / 4095.0) * 14;
+  }
 }
 
 void connect_mqtt()
@@ -144,6 +157,7 @@ void connect_mqtt()
   if (client.connect(CLIENT_ID))
   {
     client.subscribe(TOPIC);
+    client.subscribe("thresholds"); // TODO check if it works
     client.publish(TOPIC, "Connection succesfull");
     digitalWrite(CONNECTION_SUCCESS_LED, HIGH);
     digitalWrite(CONNECTION_FAILURE_LED, LOW);
@@ -186,22 +200,6 @@ void check_sunlight()
     digitalWrite(LED_PIN, LOW);
   else
     digitalWrite(LED_PIN, HIGH);
-}
-
-// TODO check if average values of ph are, in general, right for every plant
-void alert_ph()
-{
-  float pH = get_soil_ph();
-
-  if (pH < 5.5)
-    Serial.println("pH: Too acidic! Add lime.");
-  else
-  {
-    if (pH > 7.5)
-      Serial.println("pH: Too alkaline! Add sulfur.");
-    else
-      Serial.println("pH: Optimal range :)");
-  }
 }
 
 // if there is too much sunlight, close the roof
@@ -257,6 +255,52 @@ void mqtt()
   // Serial.println("Sended ;)");
 }
 
+// TODO: to be implemented
+// Initialize default thresholds
+Thresholds thresholds = { 1000.0, 50.0, 70.0 }; // Example default values
+
+void mqtt_for_thresholds(const String& payload) {
+  StaticJsonDocument<200> doc;
+  DeserializationError error = deserializeJson(doc, payload);
+
+  if (error) {
+    Serial.print("Failed to parse thresholds: ");
+    Serial.println(error.f_str());
+    return;
+  }
+
+  if (doc.containsKey("lux")) {
+    thresholds.lux = doc["lux"];
+  }
+  if (doc.containsKey("moisture")) {
+    thresholds.moisture = doc["moisture"];
+  }
+  if (doc.containsKey("tankDistance")) {
+    thresholds.tankDistance = doc["tankDistance"];
+  }
+
+  Serial.print("Updated thresholds: Lux=");
+  Serial.print(thresholds.lux);
+  Serial.print(", Moisture=");
+  Serial.print(thresholds.moisture);
+  Serial.print(", Tank Distance=");
+  Serial.println(thresholds.tankDistance);
+}
+
+// TODO check if it works, implement receiving of various threshold from mqtt server and use them as variables
+void callback(char* topic, byte* payload, unsigned int length) {
+  String message;
+  for (int i = 0; i < length; i++) {
+    message += (char)payload[i];
+  }
+
+  if (String(topic) == "thresholds") {
+    mqtt_for_thresholds(message);
+  } else if (String(topic) == TOPIC) {
+    // Handle other topics if needed
+  }
+}
+
 void loop()
 {
   check_sunlight();
@@ -264,8 +308,6 @@ void loop()
   manage_roof();
 
   manage_watering();
-
-  //alert_ph();
 
   Serial.print("\n\nph: ");
   Serial.print(get_soil_ph());
@@ -276,7 +318,7 @@ void loop()
   Serial.print("\nsoil temperature: ");
   Serial.print(get_soil_temp());
 
-    mqtt();
+  mqtt();
 
   delay(1000);
 }

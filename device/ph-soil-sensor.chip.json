@@ -1,15 +1,16 @@
 {
-  "name": "pH Soil Sensor",
-  "author": "aprus",
-  "pins": ["GND", "VCC", "A"],
-  "controls": [
-    {
-      "id": "value",
-      "label": "value",
-      "type": "range",
-      "min": 0,
-      "max": 14,
-      "step": 0.1
-    }
-  ]
+   "name": "pH sensor",
+   "author": "Elusive Attempts",
+   "pins": ["GND", "VCC", "A", "", ""],
+   "controls": [
+      {
+         "id": "value",
+         "label": "Value",
+         "type": "range",
+         "default": 2.5,
+         "min": 0.0,
+         "max": 5.0,
+         "step": 0.01
+      }
+   ]
 }
