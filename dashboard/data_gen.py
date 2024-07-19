@@ -1,6 +1,7 @@
 import paho.mqtt.client as mqtt
 import json
 import time
+import random
 
 # MQTT details
 CLIENT_ID = "Aprus_Python_clientID"
@@ -12,12 +13,14 @@ MQTT_PORT = 1883
 def generate_uniform_values(step, max_steps, current_step):
     factor = current_step / max_steps
     return {
+        "id": random.randint(1, 2),  # Simulate device ID between 1 and 100
         "lux": 20000 * factor,  # Simulate lux value between 0 and 20000
         "humidity": 20 + (80 * factor),  # Simulate humidity value between 20% and 100%
         "temperature": -10 + (60 * factor),  # Simulate temperature value between -10°C and 50°C
         "moisture": 1024 * factor,  # Simulate soil moisture value between 0 and 1024
         "tankDistance": 100 * factor  # Simulate tank distance value between 0 and 100 cm
     }
+
 
 # Function to connect to MQTT broker
 def connect_mqtt():
@@ -48,7 +51,7 @@ def publish(client):
                 current_step = 1
                 increasing = True
 
-        time.sleep(2)  # Adjust the delay to control how fast the values change
+        time.sleep(1)  # Adjust the delay to control how fast the values change
 
 if __name__ == "__main__":
     client = connect_mqtt()
