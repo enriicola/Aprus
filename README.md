@@ -1,9 +1,11 @@
 ![Aprus](aprus.png)
 
 # Aprus
+
 Roman gardens' goddess
 
 ## Sensors we plan to use:
+
 - [x] External Temperature
 - [x] External humidity
 - [x] Soil moisture (to show that our system keeps the moisture stable w.r.t. the external humidity)
@@ -12,6 +14,7 @@ Roman gardens' goddess
 - [x] Water tank level (to check if the user needs to refill it)
 
 ## Features we plan to implement:
+
 - [x] Automatic watering system
 - [ ] Dashboard GUI system to alert low level of the water tank
 - [ ] Notifications to the user if the plant needs more light
