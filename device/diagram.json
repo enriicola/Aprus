@@ -49,7 +49,7 @@
       "top": 288.5,
       "left": 26.1,
       "rotate": 180,
-      "attrs": { "distance": "27" }
+      "attrs": { "distance": "62" }
     },
     {
       "type": "wokwi-dht22",
@@ -57,7 +57,7 @@
       "top": 12.6,
       "left": 431.1,
       "rotate": 90,
-      "attrs": { "temperature": "10.1", "humidity": "70" }
+      "attrs": { "temperature": "27.2", "humidity": "77" }
     },
     { "type": "wokwi-relay-module", "id": "relay1", "top": 173, "left": 288, "attrs": {} },
     {
@@ -95,7 +95,6 @@
       "rotate": 90,
       "attrs": { "value": "1000" }
     },
-    { "type": "chip-ph-soil-sensor", "id": "chip2", "top": -75.78, "left": 14.4, "attrs": {} },
     { "type": "board-ds18b20", "id": "temp1", "top": -145.13, "left": -226.32, "attrs": {} }
   ],
   "connections": [
@@ -133,16 +132,12 @@
     [ "led3:A", "r3:1", "green", [ "v0" ] ],
     [ "r3:2", "esp:19", "green", [ "v123.6", "h-105.6" ] ],
     [ "ldr1:VCC", "esp:3V3", "red", [ "h86.4", "v0", "h-28.8" ] ],
-    [ "chip2:GND", "esp:GND.2", "black", [ "v-28.8", "h124.8" ] ],
-    [ "chip2:VCC", "esp:3V3", "red", [ "h11.8", "v57.36", "h-76.8" ] ],
     [ "chip1:VCC", "esp:3V3", "red", [ "v-9.6", "h-9.6", "v124.8" ] ],
     [ "chip1:A1", "esp:16", "green", [ "v0" ] ],
     [ "temp1:VCC", "esp:3V3", "red", [ "v57.6", "h124.8", "v57.6", "h96" ] ],
     [ "temp1:GND", "esp:GND.2", "black", [ "v-9.6", "h-28.8", "v-96", "h403.2" ] ],
     [ "temp1:DQ", "esp:25", "green", [ "v0" ] ],
-    [ "chip2:A0", "esp:26", "green", [ "v0" ] ],
-    [ "chip1:A0", "esp:35", "green", [ "v11.41", "h48", "v105.6" ] ],
-    [ "chip2:A", "esp:0", "green", [ "v0" ] ]
+    [ "chip1:A0", "esp:35", "green", [ "h0", "v30.61", "h48", "v67.2" ] ]
   ],
   "dependencies": {}
 }

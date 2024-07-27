@@ -1,12 +1,3 @@
-// TODO add something to work on https://thingspeak.com
-// TODO implement a id for every id (define id etc)
-// TODO implement receiving of various threshold from mqtt server and use them as variables
-  // Handle Incoming MQTT Messages
-// TODO Use Thresholds given by mqtt server in Your Logic
-// TODO additional improvements (	•	Error Handling: Ensure error handling for sensor readings and MQTT operations is robust. •	Power Management: If power consumption is a concern, consider implementing sleep modes or optimizing sensor polling intervals. •	Comments and Documentation: Add more comments to clarify the purpose of each function and variable.)
-
-
-
 #include <ESP32Servo.h>
 #include <MKL_HCSR04.h> // for ultrasonic sensor
 #include "DHT.h"
@@ -24,7 +15,7 @@
 #define MOISTURE_PIN 35
 #define SOIL_TEMP_PIN 25
 
-#define PH_PIN 2 // TODO: does not read anything
+// #define PH_PIN 1
 
 #define HC_TRIGGER 12
 #define HC_ECHO 14
@@ -34,21 +25,22 @@
 #define CONNECTION_FAILURE_LED 19
 
 // MQTT details
-#define CLIENT_ID "Aprus_ESP32_clientID"
+#define CLIENT_ID "15"
 #define TOPIC "Aprus"
+#define SETTINGS_TOPIC "AprusSettings"
 #define SSID "Wokwi-GUEST"
 #define PASSWORD ""
 #define MQTT_SERVER "mqtt.eclipseprojects.io"
 #define MQTT_PORT 1883
 
-// implement struct for threshold values
+// Implement struct for threshold values
 struct Thresholds
 {
   float lux;
+  float lux_roof;
   float moisture;
-  float tankDistance;
+  float tank_distance;
 };
-
 
 // Device objects
 Servo servo1;
@@ -59,6 +51,9 @@ WiFiClient espClient;
 PubSubClient client(espClient);
 OneWire oneWire(SOIL_TEMP_PIN); // for DS18B20
 DallasTemperature ds(&oneWire);  // for DS18B20
+
+// Initialize default thresholds
+Thresholds thresholds = {50.0, 80000.0, 80.0, 70.0}; // Example default values
 
 void setup()
 {
@@ -77,6 +72,7 @@ void setup()
 
   // Set up MQTT client
   client.setServer(MQTT_SERVER, MQTT_PORT);
+  client.setCallback(callback); // Set callback function for MQTT messages
 
   // Pin modes
   pinMode(LDR_PIN, INPUT);                 // initialize LDR (Light Dependent Resistor)
@@ -86,7 +82,7 @@ void setup()
   pinMode(CONNECTION_FAILURE_LED, OUTPUT); // Initialize connection failure LED
   pinMode(RELAY_PIN, OUTPUT);              // Initialize ultrasonic sensor
   pinMode(SOIL_TEMP_PIN, INPUT);           // Initialize soil temperature sensor
-  pinMode(PH_PIN, INPUT);                  // Initialize pH sensor
+  // pinMode(PH_PIN, INPUT);                  // Initialize pH sensor
 
   digitalWrite(LED_PIN, LOW);   // turn off LED, initially
   digitalWrite(RELAY_PIN, LOW); // turn off relay, initially
@@ -105,7 +101,7 @@ void setup()
   connect_mqtt();
 }
 
-// getter functions
+// Getter functions
 float get_lux()
 {
   const float GAMMA = 0.7;
@@ -140,25 +136,25 @@ float get_water_tank_level()
 {
   return hc.dist();
 }
+/*
 float get_soil_ph()
 {
   // TODO: If the pH sensor isn’t reading anything, verify its connection and calibration. You may need to calibrate or replace the sensor. For debugging, print raw values from the pH sensor to confirm it’s receiving input.
-  float get_soil_ph()
-  {
-    int rawValue = analogRead(PH_PIN);
-    Serial.print("Raw pH value: ");
-    Serial.println(rawValue);
-    return ((float)rawValue / 4095.0) * 14;
-  }
+  float rawValue = analogRead(PH_PIN);
+  Serial.print("Raw pH value: ");
+  Serial.println(rawValue);
+  float pH = ((float)rawValue / 4095.0) * 14;
+  Serial.println(pH);
+  return pH;
 }
+*/
 
 void connect_mqtt()
 {
   if (client.connect(CLIENT_ID))
   {
-    client.subscribe(TOPIC);
-    client.subscribe("thresholds"); // TODO check if it works
-    client.publish(TOPIC, "Connection succesfull");
+    client.subscribe(SETTINGS_TOPIC); // Subscribe to settings topic
+    client.publish(TOPIC, "Connection successful");
     digitalWrite(CONNECTION_SUCCESS_LED, HIGH);
     digitalWrite(CONNECTION_FAILURE_LED, LOW);
   }
@@ -169,7 +165,7 @@ void connect_mqtt()
   }
 }
 
-// virtual infinite loop to reconnect to MQTT
+// Virtual infinite loop to reconnect to MQTT
 void reconnect()
 {
   while (!client.connected())
@@ -178,8 +174,7 @@ void reconnect()
     if (client.connect(CLIENT_ID))
     {
       Serial.println("connected");
-      client.publish(TOPIC, "Nodemcu connected to MQTT");
-      client.subscribe(TOPIC);
+      client.subscribe(SETTINGS_TOPIC); // Subscribe to settings topic
     }
     else
     {
@@ -191,21 +186,21 @@ void reconnect()
   }
 }
 
-// if there is too much sunlight, turn on the white LED
+// If there is too much sunlight, turn on the white LED
 void check_sunlight()
 {
-  if (get_lux() < 20)
-    Serial.println("Too dark");
-  if (get_lux() > 50)
+  //if (get_lux() < 20)
+  //  Serial.println("Too dark");
+  if (get_lux() > thresholds.lux)
     digitalWrite(LED_PIN, LOW);
   else
     digitalWrite(LED_PIN, HIGH);
 }
 
-// if there is too much sunlight, close the roof
+// If there is too much sunlight, close the roof
 void manage_roof()
 {
-  if (get_lux() > 80000)
+  if (get_lux() > thresholds.lux_roof)
   {
     servo1.write(0);
     servo2.write(0);
@@ -221,8 +216,8 @@ void manage_watering()
 {
   // digitalWrite(RELAY_PIN, (get_water_tank_level() > 70 && get_moisture() < 80) ? HIGH : LOW);
 
-  // se l'acqua dista più di 70 cm e l'umidità è minore dell'80% ...
-  if (get_water_tank_level() < 70 && get_moisture() < 80)
+  // se l'acqua dista meno di 70 cm e l'umidità è minore dell'80% ...
+  if (get_water_tank_level() < thresholds.tank_distance && get_moisture() < thresholds.moisture)
     digitalWrite(RELAY_PIN, HIGH); // Attiva l'irrigazione
   else
     digitalWrite(RELAY_PIN, LOW); // Disattiva l'irrigazione
@@ -230,20 +225,17 @@ void manage_watering()
 
 void mqtt()
 {
-  // Gather sensor data
-  float humidity = dht.readHumidity();
-  float temperature = dht.readTemperature();
-  float tankDistance = hc.dist();
 
   // Create JSON document
   StaticJsonDocument<256> doc;
+  doc["id"] = CLIENT_ID;
   doc["lux"] = get_lux();
   doc["humidity"] = get_external_humidity();
   doc["temperature"] = get_external_temperature();
   doc["moisture"] = get_moisture();
   doc["soilTemperature"] = get_soil_temp();
   doc["pH"] = get_soil_ph();
-  doc["tankDistance"] = tankDistance;
+  doc["tankDistance"] = hc.dist();
 
   // Serialize JSON document to a string
   char buffer[256];
@@ -255,70 +247,85 @@ void mqtt()
   // Serial.println("Sended ;)");
 }
 
-// TODO: to be implemented
-// Initialize default thresholds
-Thresholds thresholds = { 1000.0, 50.0, 70.0 }; // Example default values
-
-void mqtt_for_thresholds(const String& payload) {
+void mqtt_for_thresholds(const String &payload)
+{
   StaticJsonDocument<200> doc;
   DeserializationError error = deserializeJson(doc, payload);
 
-  if (error) {
+  if (error)
+  {
     Serial.print("Failed to parse thresholds: ");
     Serial.println(error.f_str());
     return;
   }
 
-  if (doc.containsKey("lux")) {
-    thresholds.lux = doc["lux"];
-  }
-  if (doc.containsKey("moisture")) {
-    thresholds.moisture = doc["moisture"];
-  }
-  if (doc.containsKey("tankDistance")) {
-    thresholds.tankDistance = doc["tankDistance"];
-  }
+  if (doc.containsKey("light"))
+    thresholds.lux = doc["light"];
 
+  if (doc.containsKey("roof"))
+    thresholds.lux_roof = doc["roof"];
+
+  if (doc.containsKey("hum"))
+    thresholds.moisture = doc["hum"];
+  
+  if (doc.containsKey("tank"))
+    thresholds.tank_distance = doc["tank"];
+  
   Serial.print("Updated thresholds: Lux=");
   Serial.print(thresholds.lux);
+  Serial.print(", LuxRoof=");
+  Serial.print(thresholds.lux_roof);
   Serial.print(", Moisture=");
   Serial.print(thresholds.moisture);
   Serial.print(", Tank Distance=");
-  Serial.println(thresholds.tankDistance);
+  Serial.println(thresholds.tank_distance);
 }
 
-// TODO check if it works, implement receiving of various threshold from mqtt server and use them as variables
-void callback(char* topic, byte* payload, unsigned int length) {
-  String message;
-  for (int i = 0; i < length; i++) {
-    message += (char)payload[i];
-  }
+void callback(char *topic, byte *payload, unsigned int length)
+{
 
-  if (String(topic) == "thresholds") {
-    mqtt_for_thresholds(message);
-  } else if (String(topic) == TOPIC) {
-    // Handle other topics if needed
+  Serial.println(topic);
+
+  if (String(topic) == SETTINGS_TOPIC)
+  {
+    String message;
+    for (int i = 0; i < length; i++)
+    {
+      message += (char)payload[i];
+    }
+
+    StaticJsonDocument<256> doc;
+    DeserializationError error = deserializeJson(doc, message);
+  
+    Serial.println(message);
+
+    if (error)
+    {
+      Serial.print("Failed to parse settings: ");
+      Serial.println(error.f_str());
+      return;
+    }
+
+    if (doc.containsKey("id") && doc["id"].as<String>() == CLIENT_ID)
+    {
+      mqtt_for_thresholds(message);
+    }
   }
 }
 
 void loop()
 {
+  if (!client.connected())
+  {
+    reconnect();
+  }
+  client.loop();
+
   check_sunlight();
-
   manage_roof();
-
   manage_watering();
-
-  Serial.print("\n\nph: ");
-  Serial.print(get_soil_ph());
-  
-  Serial.print("\nmoisture: ");
-  Serial.print(get_moisture());
-
-  Serial.print("\nsoil temperature: ");
-  Serial.print(get_soil_temp());
 
   mqtt();
 
-  delay(1000);
+  delay(2000);
 }
