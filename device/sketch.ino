@@ -234,7 +234,7 @@ void mqtt()
   doc["temperature"] = get_external_temperature();
   doc["moisture"] = get_moisture();
   doc["soilTemperature"] = get_soil_temp();
-  doc["pH"] = get_soil_ph();
+  //doc["pH"] = get_soil_ph();
   doc["tankDistance"] = hc.dist();
 
   // Serialize JSON document to a string
